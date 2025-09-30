@@ -1,0 +1,10 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+  - job_name: 'zebra-services'
+    static_configs:
+      - targets: ['zebra-orchestrator:8000', 'sample-service:8080']
