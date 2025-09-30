@@ -2,9 +2,10 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# The observer needs Flask to run, and gunicorn to serve it.
-# We'll add other analysis libraries here in the future.
-RUN pip install --no-cache-dir Flask==3.0.3 gunicorn==22.0.0
+# Copy and install all dependencies from the shared requirements file.
+# This ensures numpy and scipy are available for the causal engine.
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the entire src directory
 COPY src/ ./src/
