@@ -1,0 +1,32 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+      http:
+
+processors:
+  batch:
+
+exporters:
+  logging:
+    loglevel: info
+
+  # Exporter 1: Send traces to Jaeger for human visualization
+  otlp/jaeger:
+    endpoint: "jaeger:4317"
+    tls:
+      insecure: true
+
+  # Exporter 2: Send traces to our custom Zebra Observer
+  otlphttp/zebra:
+    endpoint: "http://zebra-observer:9090/v1/traces"
+    tls:
+      insecure: true
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      # Fork the pipeline: send to Jaeger AND our observer
+      exporters: [logging, otlp/jaeger, otlphttp/zebra]
