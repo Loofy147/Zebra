@@ -47,78 +47,94 @@ def receive_traces():
         anomaly_detected = False
         telemetry_metrics = _extract_telemetry_metrics(trace_data)
 
-        for resource_span in trace_data.get("resourceSpans", []):
-            for scope_span in resource_span.get("scopeSpans", []):
-                for span in scope_span.get("spans", []):
-                    if span.get("name") == "roll_dice_logic":
-                        dice_roll_value = None
-                        for attribute in span.get("attributes", []):
-                            if attribute.get("key") == "dice.roll.value":
-                                dice_roll_value = attribute["value"]["intValue"]
-                                break
-
-                        if dice_roll_value and int(dice_roll_value) > 4:
-                            logging.warning(f"OBSERVER: Anomaly detected! High roll ({dice_roll_value})")
-                            anomaly_detected = True
-
-        if DEEP_LEARNING_ENABLED and telemetry_metrics:
+        # ========== ANOMALY DETECTION ==========
+        if PIPELINE_MODE == 'deep_learning' and telemetry_metrics:
             deep_anomaly_result = anomaly_detector.detect_anomaly(telemetry_metrics)
             if deep_anomaly_result.get('is_anomaly', False):
                 anomaly_detected = True
                 logging.warning(f"DEEP LEARNING: Anomaly detected with score {deep_anomaly_result['anomaly_score']:.3f}")
-
                 supabase_storage.store_anomaly({
                     **deep_anomaly_result,
                     'anomaly_type': 'neural_network_detection',
                     'telemetry_snapshot': telemetry_metrics
                 })
+        else: # Classic mode
+            for resource_span in trace_data.get("resourceSpans", []):
+                for scope_span in resource_span.get("scopeSpans", []):
+                    for span in scope_span.get("spans", []):
+                        if span.get("name") == "roll_dice_logic":
+                            dice_roll_value = None
+                            for attribute in span.get("attributes", []):
+                                if attribute.get("key") == "dice.roll.value":
+                                    dice_roll_value = attribute["value"]["intValue"]
+                                    break
+                            if dice_roll_value and int(dice_roll_value) > 4:
+                                logging.warning(f"OBSERVER: Anomaly detected! High roll ({dice_roll_value})")
+                                anomaly_detected = True
+                                break
+                    if anomaly_detected: break
+                if anomaly_detected: break
 
         if anomaly_detected:
+            # ========== ANALYSIS & INTERVENTION PIPELINE ==========
             if PIPELINE_MODE == 'deep_learning' and telemetry_metrics:
+                # 1. Causal Analysis
                 analysis_result = deep_cie_engine.analyze_anomaly_deep(
-                    telemetry_metrics,
-                    anomaly_type="performance_degradation"
+                    telemetry_metrics, "performance_degradation"
                 )
-            else:
-                analysis_result = CIE.analyze_anomaly(anomaly_type="high_roll_rate")
+                logging.info(f"DEEP LEARNING: Causal analysis complete. Root cause: {analysis_result.get('root_cause')}")
 
-            logging.critical(
-                f"OBSERVER INSIGHT: Root Cause Analysis Completed. "
-                f"Root Cause: {analysis_result['root_cause']} "
-                f"| Confidence: {analysis_result['confidence']:.2f}"
-            )
+                # 2. RL-based Intervention Recommendation
+                rl_recommendation = rl_agent.recommend_intervention(telemetry_metrics)
+                logging.info(f"DEEP LEARNING: RL Agent recommends action: {rl_recommendation.get('action')}")
 
-            root_cause = analysis_result.get("root_cause")
-            if root_cause and root_cause != "uncontrolled_variance" and root_cause != "random_variance":
-                proposal = LLM.generate_optimization(bottleneck_identifier=root_cause)
+                # 3. Code Understanding & Generation
+                root_cause_desc = analysis_result.get('root_cause', 'unknown bottleneck')
+                # Note: In a real scenario, we'd fetch the relevant code snippet. Here we use a placeholder.
+                original_code_snippet = f"# Placeholder for code related to: {root_cause_desc}"
+                proposal = code_analyzer.generate_optimized_version(
+                    original_code_snippet, root_cause_desc
+                )
+                logging.info("DEEP LEARNING: Generated optimization proposal.")
 
-                if proposal and DEEP_LEARNING_ENABLED:
-                    code_analysis = code_analyzer.analyze_bottleneck(
-                        proposal.get('original_code', ''),
-                        root_cause
-                    )
-                    proposal['code_analysis'] = code_analysis
-
+                # 4. Create PR & Store Experience
                 if proposal:
                     PR_BOT.create_pr(
-                        bottleneck_identifier=root_cause,
+                        bottleneck_identifier=root_cause_desc,
                         proposal=proposal,
                         analysis=analysis_result
                     )
-
-                    if DEEP_LEARNING_ENABLED:
-                        supabase_storage.store_intervention({
-                            'bottleneck_identifier': root_cause,
-                            'root_cause': analysis_result.get('root_cause'),
-                            'confidence': analysis_result.get('confidence'),
-                            'causal_effect_size': analysis_result.get('causal_effect_size'),
-                            'proposal_description': proposal.get('description'),
-                            'original_code': proposal.get('original_code'),
-                            'optimized_code': proposal.get('optimized_code'),
-                            'analysis_method': analysis_result.get('analysis_method', 'classic')
-                        })
-
-                        continuous_learning.experience_collector.add_performance_data(telemetry_metrics)
+                    supabase_storage.store_intervention({
+                        'bottleneck_identifier': root_cause_desc,
+                        'root_cause': analysis_result.get('root_cause'),
+                        'confidence': analysis_result.get('confidence'),
+                        'causal_effect_size': analysis_result.get('causal_effect_size'),
+                        'rl_action': rl_recommendation.get('action'),
+                        'proposal_description': proposal.get('description'),
+                        'original_code': proposal.get('original_code'),
+                        'optimized_code': proposal.get('optimized_code'),
+                        'analysis_method': 'deep_learning'
+                    })
+                    continuous_learning.record_intervention_outcome(
+                        {'telemetry': telemetry_metrics, 'action': rl_recommendation.get('action')},
+                        {'success': True} # Placeholder for outcome
+                    )
+            else: # Classic pipeline
+                analysis_result = CIE.analyze_anomaly(anomaly_type="high_roll_rate")
+                logging.critical(
+                    f"OBSERVER INSIGHT: Root Cause Analysis Completed. "
+                    f"Root Cause: {analysis_result['root_cause']} "
+                    f"| Confidence: {analysis_result['confidence']:.2f}"
+                )
+                root_cause = analysis_result.get("root_cause")
+                if root_cause and root_cause != "uncontrolled_variance":
+                    proposal = LLM.generate_optimization(bottleneck_identifier=root_cause)
+                    if proposal:
+                        PR_BOT.create_pr(
+                            bottleneck_identifier=root_cause,
+                            proposal=proposal,
+                            analysis=analysis_result
+                        )
 
         return "Traces received and analyzed", 200
 
