@@ -1,13 +1,6 @@
 version: '3.8'
 
-networks:
-  zebra-network:
-    driver: bridge
-
 services:
-  # ═══════════════════════════════════════════════════════
-  #  Application Service
-  # ═══════════════════════════════════════════════════════
   sample-service:
     build:
       context: .
@@ -15,57 +8,25 @@ services:
     ports:
       - "8080:8080"
     environment:
+      # Tell the app where the collector is.
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
-    networks:
-      - zebra-network
     depends_on:
       - otel-collector
 
-  # ═══════════════════════════════════════════════════════
-  #  Core Zebra Services
-  # ═══════════════════════════════════════════════════════
-  zebra-orchestrator:
+  zebra-observer:
     build:
       context: .
-      dockerfile: src/orchestrator/Dockerfile
+      dockerfile: src/zebra_system/Dockerfile
     ports:
-      - "8000:8000"
-    environment:
-      - RUST_LOG=info # Placeholder, can be adapted for Python logging
-    networks:
-      - zebra-network
-    depends_on:
-      - zebra-meta-learner
-      - zebra-codegen
-
-  zebra-meta-learner:
-    build:
-      context: .
-      dockerfile: src/meta_learner/Dockerfile
-    environment:
-      - RUST_LOG=info
-      - TIMESCALE_URL=postgresql://zebra:password@timescaledb:5432/zebra
-      - REDIS_URL=redis://redis:6379
-    networks:
-      - zebra-network
-    depends_on:
-      - timescaledb
-      - redis
-
-  zebra-codegen:
-    build:
-      context: .
-      dockerfile: src/code_generator/Dockerfile
-    environment:
-      - RUST_LOG=info
-      - LLM_API_KEY=${OPENAI_API_KEY}
-      - COMPILER_CACHE=/cache
+      - "9090:9090" # Port for the observer's own API
     volumes:
-      - codegen-cache:/cache
-      - ./generated:/output
-    networks:
-      - zebra-network
+      # Map the proposals directory from the container to the host
+      - ./pr_proposals:/app/pr_proposals
+    depends_on:
+      - otel-collector
 
+<<<< phase-0-observability-baseline
+=======
   zebra-observer:
     build:
       context: .
@@ -85,6 +46,7 @@ services:
   # ═══════════════════════════════════════════════════════
   #  Infrastructure
   # ═══════════════════════════════════════════════════════
+>>>>> main
   otel-collector:
     image: otel/opentelemetry-collector-contrib:0.99.0
     command: ["--config=/etc/otelcol-contrib/config.yaml"]
@@ -92,80 +54,8 @@ services:
       - ./otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml
     ports:
       - "4317:4317" # OTLP gRPC receiver
-    networks:
-      - zebra-network
 
   jaeger:
     image: jaegertracing/all-in-one:1.56
     ports:
-      - "16686:16686"
-      - "14268:14268"
-    networks:
-      - zebra-network
-
-  timescaledb:
-    image: timescale/timescaledb:latest-pg15
-    environment:
-      - POSTGRES_USER=zebra
-      - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=zebra
-    ports:
-      - "5432:5432"
-    volumes:
-      - timescale-data:/var/lib/postgresql/data
-    networks:
-      - zebra-network
-
-  neo4j:
-    image: neo4j:5
-    environment:
-      - NEO4J_AUTH=neo4j/password
-      - NEO4J_PLUGINS=["apoc", "graph-data-science"]
-    ports:
-      - "7474:7474"
-      - "7687:7687"
-    volumes:
-      - neo4j-data:/data
-    networks:
-      - zebra-network
-
-  redis:
-    image: redis:7-alpine
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis-data:/data
-    networks:
-      - zebra-network
-
-  prometheus:
-    image: prom/prometheus:latest
-    ports:
-      - "9090:9090"
-    volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
-      - prometheus-data:/prometheus
-    networks:
-      - zebra-network
-
-  grafana:
-    image: grafana/grafana:latest
-    ports:
-      - "3000:3000"
-    environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin
-    volumes:
-      - grafana-data:/var/lib/grafana
-    depends_on:
-      - prometheus
-      - timescaledb
-    networks:
-      - zebra-network
-
-volumes:
-  codegen-cache:
-  timescale-data:
-  neo4j-data:
-  redis-data:
-  prometheus-data:
-  grafana-data:
+      - "16686:16686" # Jaeger UI
