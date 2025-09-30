@@ -3,6 +3,7 @@ import json
 from flask import Flask, request, jsonify
 from .causal_engine import CIE # IMPORT the CIE
 from .shadow_llm import LLM      # IMPORT the Shadow LLM
+from .pr_bot import PR_BOT       # IMPORT the PR Bot
 
 app = Flask(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -58,18 +59,19 @@ def receive_traces():
             f"| Confidence: {analysis_result['confidence']:.2f}"
         )
 
-        # 3. Suggest Optimization (Only if a specific cause was found)
+        # 3. Suggest Optimization & Propose PR (Only if a specific cause was found)
         root_cause = analysis_result.get("root_cause")
         if root_cause and root_cause != "uncontrolled_variance":
             proposal = LLM.generate_optimization(bottleneck_identifier=root_cause)
             if proposal:
-                # In a real system, this proposal would go to a PR bot or dashboard.
-                # For now, we log it for human review.
-                logging.warning("--- Optimization Proposal for Human Review ---")
-                logging.warning(f"Description: {proposal['description']}")
-                logging.warning("Original Code:\n" + proposal['original_code'])
-                logging.warning("Optimized Code:\n" + proposal['optimized_code'])
-                logging.warning("--- End of Proposal ---")
+                # 4. Create the Pull Request
+                # The observer's final action is to hand off the completed analysis
+                # and proposal to the PR Bot to create the PR.
+                PR_BOT.create_pr(
+                    bottleneck_identifier=root_cause,
+                    proposal=proposal,
+                    analysis=analysis_result
+                )
 
     return "Traces received and analyzed", 200
 

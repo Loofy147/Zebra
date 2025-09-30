@@ -4,7 +4,7 @@ from flask import Flask, jsonify
 
 from opentelemetry import trace
 from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.sdk.trace.export import SimpleSpanProcessor
 # IMPORTANT: Import the OTLP Span Exporter
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
 from opentelemetry.sdk.resources import Resource
@@ -25,7 +25,8 @@ trace_provider = TracerProvider(resource=resource)
 # Use OTLPSpanExporter to send data to the collector.
 # The endpoint is configured by the OTEL_EXPORTER_OTLP_ENDPOINT env var
 # which we set in docker-compose.yml.
-trace_provider.add_span_processor(BatchSpanProcessor(OTLPSpanExporter()))
+# Using SimpleSpanProcessor for synchronous export to ensure testability.
+trace_provider.add_span_processor(SimpleSpanProcessor(OTLPSpanExporter()))
 trace.set_tracer_provider(trace_provider)
 
 # 3. Create and Instrument the Flask App

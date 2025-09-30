@@ -19,6 +19,9 @@ services:
       dockerfile: src/zebra_system/Dockerfile
     ports:
       - "9090:9090" # Port for the observer's own API
+    volumes:
+      # Map the proposals directory from the container to the host
+      - ./pr_proposals:/app/pr_proposals
     depends_on:
       - otel-collector
 
