@@ -19,9 +19,11 @@ exporters:
 
   # Exporter 2: Send traces to our custom Zebra Observer
   otlphttp/zebra:
-    endpoint: "http://zebra-observer:9090"
+    endpoint: "http://zebra-observer:9090/v1/traces"
     tls:
       insecure: true
+    headers:
+      Content-Type: "application/json"
 
 service:
   pipelines:
