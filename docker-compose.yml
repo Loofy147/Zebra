@@ -66,6 +66,22 @@ services:
     networks:
       - zebra-network
 
+  zebra-observer:
+    build:
+      context: .
+      dockerfile: src/zebra_orchestrator/Dockerfile
+    ports:
+      - "9090:9090"
+    environment:
+      - VITE_SUPABASE_URL=${VITE_SUPABASE_URL}
+      - VITE_SUPABASE_SUPABASE_ANON_KEY=${VITE_SUPABASE_SUPABASE_ANON_KEY}
+    networks:
+      - zebra-network
+    depends_on:
+      - otel-collector
+    volumes:
+      - ./pr_proposals:/app/pr_proposals
+
   # ═══════════════════════════════════════════════════════
   #  Infrastructure
   # ═══════════════════════════════════════════════════════

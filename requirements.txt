@@ -5,10 +5,21 @@ opentelemetry-sdk==1.25.0
 opentelemetry-exporter-otlp-proto-grpc==1.25.0
 opentelemetry-instrumentation-flask==0.46b0
 numpy==1.26.4
-scipy==1.13.0<<<<<<< phase-0-observability-baseline
+scipy==1.13.0
+requests==2.32.3
 
 # Database connectors for Meta-Learner
 SQLAlchemy==2.0.29
 psycopg2-binary==2.9.9
-=======
-requests==2.32.3>>>>>>> main
+
+# Deep Learning & ML
+torch==2.2.1
+transformers==4.38.2
+scikit-learn==1.4.1.post1
+pandas==2.2.1
+lightgbm==4.3.0
+xgboost==2.0.3
+
+# Supabase
+supabase==2.4.0
+postgrest==0.16.2
