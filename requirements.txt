@@ -1,6 +1,12 @@
+<<<<<dependabot/pip/gunicorn-23.0.0
 Flask==3.0.3
 gunicorn==23.0.0
 opentelemetry-api==1.25.0
+======
+Flask==3.1.2
+gunicorn==22.0.0
+opentelemetry-api==1.37.0
+>>>>> main
 opentelemetry-sdk==1.25.0
 opentelemetry-exporter-otlp-proto-grpc==1.25.0
 opentelemetry-instrumentation-flask==0.46b0
@@ -11,12 +17,12 @@ requests==2.32.3
 SQLAlchemy==2.0.29
 psycopg2-binary==2.9.9
 # Deep Learning & ML
-torch==2.2.1
+torch==2.8.0
 transformers==4.38.2
 scikit-learn==1.4.1.post1
 pandas==2.2.1
 lightgbm==4.3.0
-xgboost==2.0.3
+xgboost==2.1.4
 # Supabase
 supabase==2.4.2
 postgrest==0.16.2
