@@ -10,23 +10,11 @@ services:
     environment:
       # Tell the app where the collector is.
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
+    networks:
+      - zebra-network
     depends_on:
       - otel-collector
 
-  zebra-observer:
-    build:
-      context: .
-      dockerfile: src/zebra_system/Dockerfile
-    ports:
-      - "9090:9090" # Port for the observer's own API
-    volumes:
-      # Map the proposals directory from the container to the host
-      - ./pr_proposals:/app/pr_proposals
-    depends_on:
-      - otel-collector
-
-<<<< phase-0-observability-baseline
-=======
   zebra-observer:
     build:
       context: .
@@ -43,10 +31,6 @@ services:
     volumes:
       - ./pr_proposals:/app/pr_proposals
 
-  # ═══════════════════════════════════════════════════════
-  #  Infrastructure
-  # ═══════════════════════════════════════════════════════
->>>>> main
   otel-collector:
     image: otel/opentelemetry-collector-contrib:0.99.0
     command: ["--config=/etc/otelcol-contrib/config.yaml"]
@@ -54,8 +38,16 @@ services:
       - ./otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml
     ports:
       - "4317:4317" # OTLP gRPC receiver
+    networks:
+      - zebra-network
 
   jaeger:
     image: jaegertracing/all-in-one:1.56
     ports:
       - "16686:16686" # Jaeger UI
+    networks:
+      - zebra-network
+
+networks:
+  zebra-network:
+    driver: bridge
