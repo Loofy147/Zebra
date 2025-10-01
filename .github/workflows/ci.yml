@@ -25,7 +25,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}-${{ hashFiles('**/requirements-causal.txt') }}
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}-${{ hashFiles('**/requirements-causal.txt') }}-${{ hashFiles('**/requirements-shadow.txt') }}
           restore-keys: |
             ${{ runner.os }}-pip-
       - name: Install base deps
@@ -33,6 +33,7 @@ jobs:
           python -m pip install -U pip
           pip install -r requirements.txt
           pip install -r requirements-causal.txt
+          pip install -r requirements-shadow.txt
       - name: Lint & Typecheck
         run: |
           pip install black ruff mypy

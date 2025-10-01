@@ -1,0 +1,6 @@
+# Core dependencies for Shadow LLM and RAG
+numpy
+requests
+
+# Note: Specific provider packages (e.g., openai, chromadb, sentence-transformers)
+# should be managed separately or as optional extras.
