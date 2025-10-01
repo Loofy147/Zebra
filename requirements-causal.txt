@@ -1,0 +1,11 @@
+# Causal Inference & Discovery
+dowhy
+econml
+causal-learn
+cdt
+lingam
+# Governance & Tracking
+mlflow
+dvc
+# Gradient-based discovery including NOTEARS
+gcastle

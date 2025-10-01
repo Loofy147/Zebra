@@ -31,6 +31,25 @@ services:
     volumes:
       - ./pr_proposals:/app/pr_proposals
 
+  zebra-causal-worker:
+    build:
+      context: .
+      dockerfile: src/zebra_orchestrator/Dockerfile
+    environment:
+      - VITE_SUPABASE_URL=${VITE_SUPABASE_URL}
+      - VITE_SUPABASE_SUPABASE_ANON_KEY=${VITE_SUPABASE_SUPABASE_ANON_KEY}
+    networks:
+      - zebra-network
+    depends_on:
+      - otel-collector
+    # deploy: # Example for future GPU resources
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+
   otel-collector:
     image: otel/opentelemetry-collector-contrib:0.99.0
     command: ["--config=/etc/otelcol-contrib/config.yaml"]
