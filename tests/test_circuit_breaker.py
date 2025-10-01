@@ -7,8 +7,9 @@ def test_circuit_breaker_initial_state():
     cb = CircuitBreaker()
     assert cb.state == 'closed'
 
-def test_performance_breaker_triggers():
+def test_performance_breaker_triggers(mocker):
     """Test that the performance breaker opens the circuit on a significant performance drop."""
+    mocker.patch('threading.Timer')
     cb = CircuitBreaker()
     metrics = {"performance_delta": -0.2, "error_rate": 0.01}
     triggered = cb.monitor_and_break(metrics)
@@ -16,8 +17,9 @@ def test_performance_breaker_triggers():
     assert cb.state == 'open'
     assert "performance_degradation" in cb.current_reason
 
-def test_error_rate_breaker_triggers():
+def test_error_rate_breaker_triggers(mocker):
     """Test that the error rate breaker opens the circuit when the error rate is too high."""
+    mocker.patch('threading.Timer')
     cb = CircuitBreaker()
     metrics = {"performance_delta": 0.0, "error_rate": 0.1}
     triggered = cb.monitor_and_break(metrics)
@@ -33,8 +35,9 @@ def test_no_break_when_metrics_are_good():
     assert triggered is False
     assert cb.state == 'closed'
 
-def test_alert_fn_is_called_on_break():
+def test_alert_fn_is_called_on_break(mocker):
     """Test that the alert function is called when the circuit opens."""
+    mocker.patch('threading.Timer')
     alert_called = False
     breaker_name_alert = None
     reason_alert = None
