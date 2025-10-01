@@ -6,6 +6,7 @@ Tests all major components and their integration.
 
 import sys
 import logging
+import pytest
 from typing import Dict, List
 
 logging.basicConfig(level=logging.INFO, format='%(levelname)s - %(message)s')
@@ -23,7 +24,7 @@ def test_imports():
         logging.info("  ✓ Classic modules imported successfully")
     except Exception as e:
         logging.error(f"  ✗ Failed to import classic modules: {e}")
-        return False
+        assert False, f"Failed to import classic modules: {e}"
 
     try:
         from src.zebra_orchestrator import deep_learning_causal_engine
@@ -36,9 +37,7 @@ def test_imports():
         logging.info("  ✓ Deep learning modules imported successfully")
     except Exception as e:
         logging.error(f"  ✗ Failed to import deep learning modules: {e}")
-        return False
-
-    return True
+        assert False, f"Failed to import deep learning modules: {e}"
 
 
 def test_causal_inference():
@@ -54,7 +53,7 @@ def test_causal_inference():
         logging.info(f"  ✓ Classic CIE analysis: {result['root_cause']}")
     except Exception as e:
         logging.error(f"  ✗ Classic CIE test failed: {e}")
-        return False
+        assert False, f"Classic CIE test failed: {e}"
 
     try:
         from src.zebra_orchestrator.deep_learning_causal_engine import deep_cie_engine
@@ -75,9 +74,7 @@ def test_causal_inference():
         logging.info(f"  ✓ Deep CIE analysis: {result['root_cause']} (confidence: {result['confidence']:.3f})")
     except Exception as e:
         logging.error(f"  ✗ Deep CIE test failed: {e}")
-        return False
-
-    return True
+        assert False, f"Deep CIE test failed: {e}"
 
 
 def test_anomaly_detection():
@@ -106,9 +103,7 @@ def test_anomaly_detection():
         logging.info(f"  ✓ Anomaly detection result: score={result['anomaly_score']:.3f}")
     except Exception as e:
         logging.error(f"  ✗ Anomaly detection test failed: {e}")
-        return False
-
-    return True
+        assert False, f"Anomaly detection test failed: {e}"
 
 
 def test_reinforcement_learning():
@@ -139,9 +134,7 @@ def test_reinforcement_learning():
         logging.info(f"  ✓ RL training episode: reward={episode_result['reward']:.2f}")
     except Exception as e:
         logging.error(f"  ✗ RL agent test failed: {e}")
-        return False
-
-    return True
+        assert False, f"RL agent test failed: {e}"
 
 
 def test_code_understanding():
@@ -168,9 +161,7 @@ def calculate_sum(numbers):
         logging.info(f"  ✓ Feature extraction: quality={features['quality_score']:.3f}")
     except Exception as e:
         logging.error(f"  ✗ Code understanding test failed: {e}")
-        return False
-
-    return True
+        assert False, f"Code understanding test failed: {e}"
 
 
 def test_continuous_learning():
@@ -194,9 +185,7 @@ def test_continuous_learning():
         logging.info(f"  ✓ Continuous learning: {stats['total_experiences']} experiences")
     except Exception as e:
         logging.error(f"  ✗ Continuous learning test failed: {e}")
-        return False
-
-    return True
+        assert False, f"Continuous learning test failed: {e}"
 
 
 def test_storage():
@@ -209,9 +198,7 @@ def test_storage():
         logging.info("  ✓ Supabase storage client initialized")
     except Exception as e:
         logging.error(f"  ✗ Storage test failed: {e}")
-        return False
-
-    return True
+        assert False, f"Storage test failed: {e}"
 
 
 def test_integration():
@@ -249,57 +236,10 @@ def test_integration():
         logging.info("  ✓ End-to-end integration successful")
     except Exception as e:
         logging.error(f"  ✗ Integration test failed: {e}")
-        return False
-
-    return True
-
-
-def main():
-    """Run all tests."""
-    print("=" * 70)
-    print("ZEBRA SYSTEM - COMPREHENSIVE TEST SUITE")
-    print("=" * 70)
-    print()
-
-    tests = [
-        ("Module Imports", test_imports),
-        ("Causal Inference", test_causal_inference),
-        ("Anomaly Detection", test_anomaly_detection),
-        ("Reinforcement Learning", test_reinforcement_learning),
-        ("Code Understanding", test_code_understanding),
-        ("Continuous Learning", test_continuous_learning),
-        ("Storage Integration", test_storage),
-        ("End-to-End Integration", test_integration),
-    ]
-
-    results = []
-    for test_name, test_func in tests:
-        print()
-        try:
-            success = test_func()
-            results.append((test_name, success))
-        except Exception as e:
-            logging.error(f"Test '{test_name}' crashed: {e}")
-            results.append((test_name, False))
-
-    print()
-    print("=" * 70)
-    print("TEST RESULTS SUMMARY")
-    print("=" * 70)
-
-    passed = sum(1 for _, success in results if success)
-    total = len(results)
-
-    for test_name, success in results:
-        status = "✓ PASS" if success else "✗ FAIL"
-        print(f"{status:8s} | {test_name}")
-
-    print()
-    print(f"Total: {passed}/{total} tests passed ({passed/total*100:.1f}%)")
-    print("=" * 70)
-
-    return 0 if passed == total else 1
+        assert False, f"Integration test failed: {e}"
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    # The '-v' argument is for verbose output.
+    # The '-s' argument is to show print statements (and logging).
+    sys.exit(pytest.main(["-v", "-s", __file__]))
