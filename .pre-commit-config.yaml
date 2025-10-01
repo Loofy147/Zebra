@@ -4,6 +4,6 @@ repos:
     hooks:
     - id: black
 -   repo: https://github.com/pycqa/ruff
-    rev: stable
+    rev: v0.1.0
     hooks:
     - id: ruff
