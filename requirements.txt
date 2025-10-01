@@ -16,7 +16,7 @@ transformers==4.38.2
 scikit-learn==1.4.1.post1
 pandas==2.2.1
 lightgbm==4.3.0
-xgboost==2.0.3
+xgboost==2.1.4
 # Supabase
 supabase==2.4.2
 postgrest==0.16.2
