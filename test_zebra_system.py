@@ -15,7 +15,6 @@ logging.basicConfig(level=logging.INFO, format='%(levelname)s - %(message)s')
 def test_imports():
     """Test that all modules can be imported."""
     logging.info("Testing module imports...")
-
     try:
         from src.zebra_orchestrator import causal_engine
         from src.zebra_orchestrator import shadow_llm
@@ -23,8 +22,7 @@ def test_imports():
         from src.zebra_orchestrator import observer
         logging.info("  ✓ Classic modules imported successfully")
     except Exception as e:
-        logging.error(f"  ✗ Failed to import classic modules: {e}")
-        assert False, f"Failed to import classic modules: {e}"
+        pytest.fail(f"Failed to import classic modules: {e}")
 
     try:
         from src.zebra_orchestrator import deep_learning_causal_engine
@@ -36,210 +34,138 @@ def test_imports():
         from src.zebra_orchestrator import benchmarking
         logging.info("  ✓ Deep learning modules imported successfully")
     except Exception as e:
-        logging.error(f"  ✗ Failed to import deep learning modules: {e}")
-        assert False, f"Failed to import deep learning modules: {e}"
+        pytest.fail(f"Failed to import deep learning modules: {e}")
 
 
 def test_causal_inference():
     """Test causal inference engine."""
     logging.info("Testing causal inference engine...")
-
     try:
         from src.zebra_orchestrator.causal_engine import CIE
-
         result = CIE.analyze_anomaly("high_roll_rate")
         assert 'root_cause' in result
         assert 'confidence' in result
         logging.info(f"  ✓ Classic CIE analysis: {result['root_cause']}")
     except Exception as e:
-        logging.error(f"  ✗ Classic CIE test failed: {e}")
-        assert False, f"Classic CIE test failed: {e}"
+        pytest.fail(f"Classic CIE test failed: {e}")
 
     try:
         from src.zebra_orchestrator.deep_learning_causal_engine import deep_cie_engine
-
         test_data = {
-            'latency_p50': 50.0,
-            'latency_p95': 100.0,
-            'latency_p99': 150.0,
-            'request_rate': 100.0,
-            'error_rate': 0.01,
-            'cpu_usage': 0.3,
-            'memory_usage': 0.5
+            'latency_p50': 50.0, 'latency_p95': 100.0, 'latency_p99': 150.0,
+            'request_rate': 100.0, 'error_rate': 0.01, 'cpu_usage': 0.3, 'memory_usage': 0.5
         }
-
         result = deep_cie_engine.analyze_anomaly_deep(test_data, "test_anomaly")
         assert 'root_cause' in result
         assert 'confidence' in result
         logging.info(f"  ✓ Deep CIE analysis: {result['root_cause']} (confidence: {result['confidence']:.3f})")
     except Exception as e:
-        logging.error(f"  ✗ Deep CIE test failed: {e}")
-        assert False, f"Deep CIE test failed: {e}"
+        pytest.fail(f"Deep CIE test failed: {e}")
 
 
 def test_anomaly_detection():
     """Test anomaly detection system."""
     logging.info("Testing anomaly detection...")
-
     try:
         from src.zebra_orchestrator.anomaly_detector import anomaly_detector
-
         test_data = {
-            'latency_p50': 50.0,
-            'latency_p95': 100.0,
-            'latency_p99': 150.0,
-            'request_rate': 100.0,
-            'error_rate': 0.01,
-            'cpu_usage': 0.3,
-            'memory_usage': 0.5
+            'latency_p50': 50.0, 'latency_p95': 100.0, 'latency_p99': 150.0,
+            'request_rate': 100.0, 'error_rate': 0.01, 'cpu_usage': 0.3, 'memory_usage': 0.5
         }
-
         for _ in range(15):
             anomaly_detector.detect_anomaly(test_data)
-
         result = anomaly_detector.detect_anomaly(test_data)
         assert 'is_anomaly' in result
         assert 'anomaly_score' in result
         logging.info(f"  ✓ Anomaly detection result: score={result['anomaly_score']:.3f}")
     except Exception as e:
-        logging.error(f"  ✗ Anomaly detection test failed: {e}")
-        assert False, f"Anomaly detection test failed: {e}"
+        pytest.fail(f"Anomaly detection test failed: {e}")
 
 
 def test_reinforcement_learning():
     """Test RL agent."""
     logging.info("Testing reinforcement learning agent...")
-
     try:
         from src.zebra_orchestrator.reinforcement_learning import rl_agent, InterventionEnvironment
-
         test_state = {
-            'latency_p50': 50.0,
-            'latency_p95': 100.0,
-            'latency_p99': 150.0,
-            'request_rate': 100.0,
-            'error_rate': 0.01,
-            'cpu_usage': 0.3,
-            'memory_usage': 0.5
+            'latency_p50': 50.0, 'latency_p95': 100.0, 'latency_p99': 150.0,
+            'request_rate': 100.0, 'error_rate': 0.01, 'cpu_usage': 0.3, 'memory_usage': 0.5
         }
-
         recommendation = rl_agent.recommend_intervention(test_state)
         assert 'recommended_action' in recommendation
         assert 'confidence' in recommendation
         logging.info(f"  ✓ RL recommendation: {recommendation['recommended_action']} (confidence: {recommendation['confidence']:.3f})")
-
         env = InterventionEnvironment()
         episode_result = rl_agent.train_episode(env)
         assert 'reward' in episode_result
         logging.info(f"  ✓ RL training episode: reward={episode_result['reward']:.2f}")
     except Exception as e:
-        logging.error(f"  ✗ RL agent test failed: {e}")
-        assert False, f"RL agent test failed: {e}"
+        pytest.fail(f"RL agent test failed: {e}")
 
 
 def test_code_understanding():
     """Test code analysis system."""
     logging.info("Testing code understanding...")
-
     try:
         from src.zebra_orchestrator.code_understanding import code_analyzer
-
-        test_code = """
-def calculate_sum(numbers):
-    total = 0
-    for num in numbers:
-        total += num
-    return total
-"""
-
+        test_code = "def f(x): return x"
         analysis = code_analyzer.analyze_bottleneck(test_code, "performance_issue")
         assert 'quality_metrics' in analysis
         logging.info(f"  ✓ Code analysis completed")
-
         features = code_analyzer.extract_code_features(test_code)
         assert 'quality_score' in features
         logging.info(f"  ✓ Feature extraction: quality={features['quality_score']:.3f}")
     except Exception as e:
-        logging.error(f"  ✗ Code understanding test failed: {e}")
-        assert False, f"Code understanding test failed: {e}"
+        pytest.fail(f"Code understanding test failed: {e}")
 
 
 def test_continuous_learning():
     """Test continuous learning pipeline."""
     logging.info("Testing continuous learning pipeline...")
-
     try:
         from src.zebra_orchestrator.continuous_learning import continuous_learning
-
         experience = {
-            'state': {'latency': 50.0},
-            'action': {'type': 'optimize', 'index': 1},
-            'reward': 10.0,
-            'next_state': {'latency': 40.0}
+            'state': {'latency': 50.0}, 'action': {'type': 'optimize', 'index': 1},
+            'reward': 10.0, 'next_state': {'latency': 40.0}
         }
-
         continuous_learning.experience_collector.add_experience(experience)
-
         stats = continuous_learning.get_learning_statistics()
         assert 'total_experiences' in stats
         logging.info(f"  ✓ Continuous learning: {stats['total_experiences']} experiences")
     except Exception as e:
-        logging.error(f"  ✗ Continuous learning test failed: {e}")
-        assert False, f"Continuous learning test failed: {e}"
+        pytest.fail(f"Continuous learning test failed: {e}")
 
 
 def test_storage():
     """Test Supabase storage integration."""
     logging.info("Testing storage integration...")
-
     try:
         from src.zebra_orchestrator.supabase_storage import supabase_storage
-
         logging.info("  ✓ Supabase storage client initialized")
     except Exception as e:
-        logging.error(f"  ✗ Storage test failed: {e}")
-        assert False, f"Storage test failed: {e}"
+        pytest.fail(f"Storage test failed: {e}")
 
 
 def test_integration():
     """Test end-to-end integration."""
     logging.info("Testing end-to-end integration...")
-
     try:
         from src.zebra_orchestrator.anomaly_detector import anomaly_detector
         from src.zebra_orchestrator.deep_learning_causal_engine import deep_cie_engine
         from src.zebra_orchestrator.reinforcement_learning import rl_agent
-
         test_data = {
-            'latency_p50': 80.0,
-            'latency_p95': 150.0,
-            'latency_p99': 200.0,
-            'request_rate': 120.0,
-            'error_rate': 0.02,
-            'cpu_usage': 0.6,
-            'memory_usage': 0.7
+            'latency_p50': 80.0, 'latency_p95': 150.0, 'latency_p99': 200.0,
+            'request_rate': 120.0, 'error_rate': 0.02, 'cpu_usage': 0.6, 'memory_usage': 0.7
         }
-
         for _ in range(15):
             anomaly_detector.detect_anomaly(test_data)
-
         anomaly_result = anomaly_detector.detect_anomaly(test_data)
         logging.info(f"  → Anomaly detection: {anomaly_result['is_anomaly']}")
-
         if anomaly_result['is_anomaly']:
             causal_result = deep_cie_engine.analyze_anomaly_deep(test_data, "integration_test")
             logging.info(f"  → Causal analysis: {causal_result['root_cause']}")
-
             recommendation = rl_agent.recommend_intervention(test_data)
             logging.info(f"  → RL recommendation: {recommendation['recommended_action']}")
-
         logging.info("  ✓ End-to-end integration successful")
     except Exception as e:
-        logging.error(f"  ✗ Integration test failed: {e}")
-        assert False, f"Integration test failed: {e}"
-
-
-if __name__ == "__main__":
-    # The '-v' argument is for verbose output.
-    # The '-s' argument is to show print statements (and logging).
-    sys.exit(pytest.main(["-v", "-s", __file__]))
+        pytest.fail(f"Integration test failed: {e}")

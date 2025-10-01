@@ -1,2 +1,0 @@
-# For IntelligentCache
-redis[async]

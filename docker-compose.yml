@@ -8,12 +8,25 @@ services:
     ports:
       - "8080:8080"
     environment:
+      # Tell the app where the collector is.
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
-    networks:
-      - zebra-network
     depends_on:
       - otel-collector
 
+  zebra-observer:
+    build:
+      context: .
+      dockerfile: src/zebra_system/Dockerfile
+    ports:
+      - "9090:9090" # Port for the observer's own API
+    volumes:
+      # Map the proposals directory from the container to the host
+      - ./pr_proposals:/app/pr_proposals
+    depends_on:
+      - otel-collector
+
+<<<< phase-0-observability-baseline
+=======
   zebra-observer:
     build:
       context: .
@@ -30,65 +43,19 @@ services:
     volumes:
       - ./pr_proposals:/app/pr_proposals
 
-  zebra-causal-worker:
-    build:
-      context: .
-      dockerfile: src/zebra_causal_worker/Dockerfile
-    environment:
-      - VITE_SUPABASE_URL=${VITE_SUPABASE_URL}
-      - VITE_SUPABASE_SUPABASE_ANON_KEY=${VITE_SUPABASE_SUPABASE_ANON_KEY}
-    networks:
-      - zebra-network
-    depends_on:
-      - otel-collector
-
-  # Observability Stack
+  # ═══════════════════════════════════════════════════════
+  #  Infrastructure
+  # ═══════════════════════════════════════════════════════
+>>>>> main
   otel-collector:
     image: otel/opentelemetry-collector-contrib:0.99.0
     command: ["--config=/etc/otelcol-contrib/config.yaml"]
     volumes:
       - ./otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml
     ports:
-      - "4317:4317"   # OTLP gRPC receiver
-      - "8889:8889"   # Prometheus exporter
-    networks:
-      - zebra-network
-    depends_on:
-      - jaeger
+      - "4317:4317" # OTLP gRPC receiver
 
   jaeger:
     image: jaegertracing/all-in-one:1.56
     ports:
       - "16686:16686" # Jaeger UI
-    networks:
-      - zebra-network
-
-  prometheus:
-    image: prom/prometheus:v2.44.0
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--web.enable-remote-write-receiver'
-      - '--enable-feature=exemplar-storage'
-    volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
-    ports:
-      - "9091:9090"
-    networks:
-      - zebra-network
-
-  grafana:
-    image: grafana/grafana:9.4.7
-    volumes:
-      - ./grafana/provisioning:/etc/grafana/provisioning
-    environment:
-      - GF_AUTH_ANONYMOUS_ENABLED=true
-      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
-      - GF_AUTH_DISABLE_LOGIN_FORM=true
-    ports:
-      - "3000:3000"
-    networks:
-      - zebra-network
-
-networks:
-  zebra-network:
-    driver: bridge
