@@ -9,3 +9,4 @@ mlflow
 dvc
 # Gradient-based discovery including NOTEARS
 gcastle
+statsmodels
