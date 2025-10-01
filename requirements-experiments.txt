@@ -1,0 +1,10 @@
+# Core dependencies for experimentation
+numpy
+pandas
+scipy
+scikit-learn
+statsmodels
+
+# Advanced causal inference libraries (optional, but recommended)
+econml
+causalml
