@@ -8,6 +8,7 @@ import sys
 import logging
 import pytest
 from typing import Dict, List
+from datetime import datetime, timezone
 
 logging.basicConfig(level=logging.INFO, format='%(levelname)s - %(message)s')
 
@@ -37,9 +38,13 @@ def test_imports():
         pytest.fail(f"Failed to import deep learning modules: {e}")
 
 
-def test_causal_inference():
+def test_causal_inference(mocker):
     """Test causal inference engine."""
     logging.info("Testing causal inference engine...")
+    mock_now = datetime.now(timezone.utc)
+    mock_dt = mocker.MagicMock()
+    mock_dt.utcnow.return_value = mock_now
+    mocker.patch('src.zebra_orchestrator.deep_learning_causal_engine.datetime', mock_dt)
     try:
         from src.zebra_orchestrator.causal_engine import CIE
         result = CIE.analyze_anomaly("high_roll_rate")
@@ -63,9 +68,13 @@ def test_causal_inference():
         pytest.fail(f"Deep CIE test failed: {e}")
 
 
-def test_anomaly_detection():
+def test_anomaly_detection(mocker):
     """Test anomaly detection system."""
     logging.info("Testing anomaly detection...")
+    mock_now = datetime.now(timezone.utc)
+    mock_dt = mocker.MagicMock()
+    mock_dt.utcnow.return_value = mock_now
+    mocker.patch('src.zebra_orchestrator.anomaly_detector.datetime', mock_dt)
     try:
         from src.zebra_orchestrator.anomaly_detector import anomaly_detector
         test_data = {
@@ -119,9 +128,13 @@ def test_code_understanding():
         pytest.fail(f"Code understanding test failed: {e}")
 
 
-def test_continuous_learning():
+def test_continuous_learning(mocker):
     """Test continuous learning pipeline."""
     logging.info("Testing continuous learning pipeline...")
+    mock_now = datetime.now(timezone.utc)
+    mock_dt = mocker.MagicMock()
+    mock_dt.utcnow.return_value = mock_now
+    mocker.patch('src.zebra_orchestrator.continuous_learning.datetime', mock_dt)
     try:
         from src.zebra_orchestrator.continuous_learning import continuous_learning
         experience = {
