@@ -93,7 +93,7 @@ The system includes a comprehensive suite of tests and benchmarks to ensure corr
 
 *   **Run Unit & Integration Tests:**
     ```bash
-    python3 test_zebra_system.py
+    pytest test_zebra_system.py
     ```
 *   **Run Performance Benchmarks:**
     ```bash

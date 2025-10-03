@@ -16,6 +16,20 @@ services:
   zebra-observer:
     build:
       context: .
+      dockerfile: src/zebra_system/Dockerfile
+    ports:
+      - "9090:9090" # Port for the observer's own API
+    volumes:
+      # Map the proposals directory from the container to the host
+      - ./pr_proposals:/app/pr_proposals
+    depends_on:
+      - otel-collector
+
+<<<< phase-0-observability-baseline
+=======
+  zebra-observer:
+    build:
+      context: .
       dockerfile: src/zebra_orchestrator/Dockerfile
     ports:
       - "9090:9090"
@@ -32,6 +46,7 @@ services:
   # ═══════════════════════════════════════════════════════
   #  Infrastructure
   # ═══════════════════════════════════════════════════════
+>>>>> main
   otel-collector:
     image: otel/opentelemetry-collector-contrib:0.99.0
     command: ["--config=/etc/otelcol-contrib/config.yaml"]
